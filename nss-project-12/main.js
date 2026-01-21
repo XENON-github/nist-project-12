@@ -41,4 +41,14 @@ document.addEventListener('DOMContentLoaded', () => {
             applyTheme();
         });
     }
+
+    // Toggle Add Book Form Logic
+    const addBookBtn = document.getElementById('addBookBtn');
+    const addBookForm = document.getElementById('addBookForm');
+
+    if (addBookBtn && addBookForm) {
+        addBookBtn.addEventListener('click', () => {
+            addBookForm.classList.toggle('hidden');
+        });
+    }
 });

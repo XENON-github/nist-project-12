@@ -63,6 +63,7 @@ body {
     transition: transform 0.3s, box-shadow 0.3s, background-color 0.3s;
     text-decoration: none;
     color: #333333; /* Dark Text */
+    margin-bottom: 20px; /* Added for spacing between cards */
 }
 
 .card:hover {
@@ -102,10 +103,24 @@ form input[type="date"] { /* Added date input for consistency */
     color: #333333;
 }
 
+form textarea {
+    padding: 14px 18px;
+    margin-bottom: 15px;
+    border: 1px solid #c8e6c9; /* Border Gray */
+    border-radius: 8px;
+    font-size: 1rem;
+    outline: none;
+    transition: border-color 0.3s, box-shadow 0.3s, background-color 0.3s, color 0.3s;
+    background-color: #ffffff;
+    color: #333333;
+    resize: vertical;
+}
+
 form input[type="text"]:focus,
 form input[type="email"]:focus,
 form input[type="password"]:focus,
-form input[type="date"]:focus {
+form input[type="date"]:focus,
+form textarea:focus {
     border-color: #4CAF50; /* Primary Green */
     box-shadow: 0 0 8px rgba(76, 175, 80, 0.2); /* Primary Green with transparency */
 }
@@ -445,4 +460,25 @@ body.dark-mode @media screen and (max-width: 768px) .nav-menu {
 
 body.dark-mode .dark-mode-toggle .toggle-label {
     color: #e0e0e0; /* For dark mode */
+}
+
+/* Message Styles */
+.message {
+    padding: 15px;
+    margin-bottom: 20px;
+    border-radius: 8px;
+    color: #ffffff;
+    font-weight: 500;
+}
+
+.message.success {
+    background-color: #4CAF50; /* Primary Green */
+}
+
+.message.error {
+    background-color: #f44336; /* Error Red */
+}
+
+.hidden {
+    display: none !important;
 }

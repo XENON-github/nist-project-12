@@ -2,6 +2,9 @@
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
 
+
+//enter your own credentials here
+
 $servername = "";
 $username = "";       // MySQL user
 $password = "";      // MySQL password

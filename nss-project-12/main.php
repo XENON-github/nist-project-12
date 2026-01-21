@@ -59,13 +59,28 @@ $user = $res->fetch_assoc();
 
     <div class="dashboard-container">
 
-    <?php if($role==='student'): ?>
-      <!-- Request Form -->
-      <div class="card">
-        <h2>Request a Book</h2>
-        <?php include __DIR__.'/books/request_book.php'; ?>
-      </div>
+    <?php
+    if (isset($_GET['message'])) {
+        $message = $_GET['message'];
+        $messageText = '';
+        $messageClass = 'success'; // Default to success
+        if ($message === 'request_successful') {
+            $messageText = 'Your book request has been submitted successfully.';
+        } elseif ($message === 'already_requested') {
+            $messageText = 'You have already requested this book.';
+            $messageClass = 'error';
+        } elseif ($message === 'out_of_stock') {
+            $messageText = 'This book is currently out of stock.';
+            $messageClass = 'error';
+        }
 
+        if ($messageText) {
+            echo "<div class='card message {$messageClass}'>{$messageText}</div>";
+        }
+    }
+    ?>
+
+    <?php if($role==='student'): ?>
       <!-- My Borrowed Books -->
       <div class="card">
         <h2><i class="fas fa-book"></i> My Borrowed Books</h2>
@@ -94,6 +109,38 @@ $user = $res->fetch_assoc();
           <?php endif; ?>
         </div>
       </div>
+
+      <!-- My Book Requests -->
+      <div class="card">
+        <h2><i class="fas fa-tasks"></i> My Book Requests</h2>
+        <?php
+          $stmt = $conn->prepare("SELECT book_name, status, denial_reason FROM requests WHERE student_id=? AND (status = 'denied' OR status = 'pending') ORDER BY created_at DESC");
+          $stmt->bind_param("i",$user_id);
+          $stmt->execute();
+          $rows = $stmt->get_result();
+        ?>
+        <div class="table-responsive">
+          <?php if($rows->num_rows>0): ?>
+          <table>
+            <thead><tr><th>Book</th><th>Status</th><th>Reason for Denial</th></tr></thead>
+            <tbody>
+            <?php while($row=$rows->fetch_assoc()): ?>
+              <tr>
+                <td><?= htmlspecialchars($row['book_name']); ?></td>
+                <td><?= htmlspecialchars($row['status']); ?></td>
+                <td><?= strtolower(trim($row['status'])) === 'denied' ? htmlspecialchars($row['denial_reason']) : ''; ?></td>
+              </tr>
+            <?php endwhile; ?>
+            </tbody>
+          </table>
+          <?php else: ?>
+            <p>You haven't made any book requests yet.</p>
+          <?php endif; ?>
+        </div>
+      </div>
+
+      <!-- Available Books -->
+      <?php include __DIR__.'/books/list_books.php'; ?>
 
     <?php elseif($role==='teacher' || $role==='admin'): ?>
 
@@ -125,12 +172,18 @@ $user = $res->fetch_assoc();
                     <input type="date" name="deadline" required>
                     <button class="btn approve">Grant</button>
                   </form>
-                  <form method="POST" action="books/approve_request.php" style="display:inline">
-                    <input type="hidden" name="action" value="deny">
-                    <input type="hidden" name="book_name" value="<?= htmlspecialchars($row['book_name']); ?>">
-                    <input type="hidden" name="student_id" value="<?= $row['student_id']; ?>">
-                    <button class="btn deny">Deny</button>
-                  </form>
+                  <button class="btn deny" onclick="document.getElementById('denyForm-<?= $row['student_id'] ?>-<?= htmlspecialchars($row['book_name']) ?>').classList.toggle('hidden');">Deny</button>
+
+                  <div id="denyForm-<?= $row['student_id'] ?>-<?= htmlspecialchars($row['book_name']) ?>" class="card hidden" style="margin-top: 10px;">
+                    <h4>Reason for Denial</h4>
+                    <form method="POST" action="books/approve_request.php">
+                      <input type="hidden" name="action" value="deny">
+                      <input type="hidden" name="book_name" value="<?= htmlspecialchars($row['book_name']); ?>">
+                      <input type="hidden" name="student_id" value="<?= $row['student_id']; ?>">
+                      <textarea name="denial_reason" rows="3" placeholder="Enter reason for denial" required></textarea>
+                      <button type="submit" class="btn deny">Confirm Deny</button>
+                    </form>
+                  </div>
                 </td>
               </tr>
             <?php endwhile; ?>
@@ -189,6 +242,9 @@ $user = $res->fetch_assoc();
           <?php endif; ?>
         </div>
       </div>
+
+      <!-- Available Books -->
+      <?php include __DIR__.'/books/list_books.php'; ?>
 
     <?php else: ?>
       <div class="card">
